@@ -17,6 +17,8 @@ class Interpreter(InterpreterBase):
         self.find_funcs()
         self.WHILE_controls = defaultdict(controls.Control_WHILE)
         self.ENDWHILE_controls = defaultdict(controls.Control_ENDWHILE)
+        self.IF_controls = defaultdict(controls.Control_IF)
+        self.ELSE_Controls = defaultdict(controls.Control_ELSE)
         self.setup_controls()
 
         self.ip = self.func_locs['main'] + 1
@@ -48,6 +50,10 @@ class Interpreter(InterpreterBase):
                     self.interpret_WHILE(stack)
                 case self.ENDWHILE_DEF:
                     self.interpret_ENDWHILE()
+                case self.IF_DEF:
+                    self.interpret_IF(stack)
+                case self.ELSE_DEF:
+                    self.interpret_ELSE()
                 case _:
                     stack.append(token)
         # print(self.tokenized_lines[self.ip])
@@ -64,6 +70,23 @@ class Interpreter(InterpreterBase):
 
     def interpret_ENDWHILE(self):
         self.ip = self.ENDWHILE_controls[self.ip].WHILE_line - 1
+
+    def interpret_IF(self, stack):
+        condition = stack.pop()
+        if condition in self.variables:
+            condition = self.variables[condition]
+        if not isinstance(condition, bool):
+            # TODO: throw an error, if condition must be a bool
+            pass
+        if condition != True:
+            else_line = self.IF_controls[self.ip].ELSE_line
+            if else_line != None:
+                self.ip = else_line
+            else:
+                self.ip = self.IF_controls[self.ip].ENDIF_line
+
+    def interpret_ELSE(self):
+        self.ip = self.ELSE_Controls[self.ip].ENDIF_line
 
     def interpret_EXPRESSION(self, expression, stack):
         a = stack.pop()
@@ -179,7 +202,10 @@ class Interpreter(InterpreterBase):
 
     def interpret_RETURN(self, stack):
         if len(stack) > 0:
-            self.variables['result'] = stack.pop()
+            i = stack.pop()
+            if i in self.variables:
+                i = self.variables[i]
+            self.variables['result'] = i
         else:
             # TODO: throw an error if stack is empty
             pass
@@ -194,6 +220,9 @@ class Interpreter(InterpreterBase):
     
     def setup_controls(self):
         while_stack = deque()
+        if_stack = deque()
+        else_stack = deque()
+
         for index, tokens in enumerate(self.tokenized_lines):
             if not tokens:
                 continue
@@ -207,4 +236,24 @@ class Interpreter(InterpreterBase):
                         pass
                     self.WHILE_controls[while_index].ENDWHILE_line = index
                     self.ENDWHILE_controls[index].WHILE_line = while_index
+                case self.IF_DEF:
+                    if_stack.append(index)
+                case self.ELSE_DEF:
+                    else_stack.append(index)
+                    if_index = if_stack[-1] # if_stack.pop()
+                    if self.leading_spaces[if_index] != self.leading_spaces[index]:
+                        # TODO: throw a syntax error at line_num=if_index
+                        pass
+                    self.IF_controls[if_index].ELSE_line = index
+                case self.ENDIF_DEF:
+                    if_index = if_stack.pop()
+                    if self.leading_spaces[if_index] != self.leading_spaces[index]:
+                        # TODO: throw a syntax error at line_num=if_line
+                        pass
+                    self.IF_controls[if_index].ENDIF_line = index
+                    if len(else_stack) > 0:
+                        else_line = else_stack.pop()
+                        self.ELSE_Controls[else_line].ENDIF_line = index
+
+
     
