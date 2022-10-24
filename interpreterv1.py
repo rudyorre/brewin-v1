@@ -98,8 +98,6 @@ class Interpreter(InterpreterBase):
             a1 = a
         if isinstance(a, str) and a[0] == '"' and a[-1] == '"': # String
             a = a[1:-1]
-        elif isinstance(a, str) and '.' in a: # Floating Point
-            a = float(a)
         elif a == 'True' or a == 'False': # Boolean
             a = a == 'True'
         elif isinstance(a, str) and a.isnumeric(): # Integer
@@ -111,8 +109,6 @@ class Interpreter(InterpreterBase):
             b1 = b
         if isinstance(b, str) and b[0] == '"' and b[-1] == '"': # String
             b = b[1:-1]
-        elif isinstance(b, str) and '.' in b: # Floating Point
-            b = float(b)
         elif b == 'True' or b == 'False': # Boolean
             b = b == 'True'
         elif isinstance(b, str) and b.isnumeric(): # Integer
@@ -129,9 +125,9 @@ class Interpreter(InterpreterBase):
             case '-':
                 result = a - b
             case '*':
-                result = a * b
+                result = int(a * b)
             case '/':
-                result = a / b
+                result = int(a / b)
             case '%':
                 result = a % b
             case '<':
@@ -160,8 +156,6 @@ class Interpreter(InterpreterBase):
         # print(f'value: {value}, variable: {variable}')
         if isinstance(value, str) and value[0] == '"' and value[-1] == '"': # String
             value = value[1:-1]
-        elif isinstance(value, str) and '.' in value: # Floating Point
-            value = float(value)
         elif value == 'True' or value == 'False': # Boolean
             value = value == 'True'
         elif isinstance(value, bool):
