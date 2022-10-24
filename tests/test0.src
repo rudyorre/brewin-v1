@@ -1,0 +1,23 @@
+func f
+ assign f1 10
+ funccall print f1
+endfunc
+
+func f1
+ funccall print "Rudy"
+endfunc
+
+func main
+ assign var1 15
+ assign var2 4
+ assign str1 "foobar"
+ funccall print var1
+ funccall print 32
+ funccall print "this is # a string"
+ funccall print -5
+ funccall print > var1 32
+ funccall print == var1 - var2 5
+ funccall print & > var1 5 <= var2 3
+ funccall print == str1 "foobar"
+ funccall print & True True
+endfunc
