@@ -1,4 +1,4 @@
-from intbase import InterpreterBase
+from intbase import *
 import util
 from collections import defaultdict, deque
 import controls
@@ -11,7 +11,7 @@ class Interpreter(InterpreterBase):
         self.variables = dict()
         self.call_stack = deque()
 
-        self.variables['result'] = None
+        # self.variables['result'] = None
 
     def run(self, program):
         self.tokenized_lines = [util.tokenize(line) for line in program]
@@ -119,6 +119,8 @@ class Interpreter(InterpreterBase):
         #elif a != 'True' and a != 'False' and b != 'True' and b != 'False':
         #    a, b = int(a), int(b)
         result = None
+        if type(a) != type(b):
+            super().error(ErrorType.TYPE_ERROR, line_num=self.ip)
         match expression:
             case '+':
                 result = a + b
@@ -160,8 +162,13 @@ class Interpreter(InterpreterBase):
             value = value == 'True'
         elif isinstance(value, bool):
             pass
-        elif isinstance(value, str) and value.isnumeric(): # Integer
+        elif isinstance(value, str) and value.isnumeric() or isinstance(value, int) or isinstance(value, float): # Integer
             value = int(value)
+        elif value in self.variables:
+            value = self.variables[value]
+        else:
+            print(value, type(value))
+            super().error(ErrorType.NAME_ERROR, line_num=self.ip)
         # print(f'value: {value}, variable: {variable}')
         self.variables[variable] = value
 

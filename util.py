@@ -1,5 +1,22 @@
 from intbase import InterpreterBase
+from enum import Enum
+import re
 import functools
+
+class Type(Enum):
+    INT = 1
+    STRING = 2
+    VAR = 3
+    BOOL = 4
+
+def get_type(token):
+    if re.search('^-?[0-9]+$', token):
+        return Type.INT
+    if token[0] == '"':
+        return Type.STRING
+    if token in ['True', 'False']:
+        return Type.BOOL
+    return Type.VAR
 
 def tokenize(line):
     '''
