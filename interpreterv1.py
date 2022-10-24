@@ -1,6 +1,7 @@
 from intbase import InterpreterBase
 import util
 from collections import defaultdict, deque
+import controls
 
 class Interpreter(InterpreterBase):
 
@@ -14,7 +15,10 @@ class Interpreter(InterpreterBase):
         self.tokenized_lines = [util.tokenize(line) for line in program]
         self.leading_spaces = [len(line) - len(line.lstrip()) for line in program]
         self.find_funcs()
-
+        self.WHILE_controls = defaultdict(controls.Control_WHILE)
+        self.ENDWHILE_controls = defaultdict(controls.Control_ENDWHILE)
+        self.setup_controls()
+        
         self.ip = self.func_locs['main'] + 1
         self.call_stack.append(self.ip)
 
@@ -40,9 +44,26 @@ class Interpreter(InterpreterBase):
                     self.interpret_RETURN(stack)
                 case '+' | '-' | '*' | '/' | '%' | '<' | '<=' | '>' | '>=' | '!=' | '==' | '&' | '|':
                     self.interpret_EXPRESSION(token, stack)
+                case self.WHILE_DEF:
+                    self.interpret_WHILE(stack)
+                case self.ENDWHILE_DEF:
+                    self.interpret_ENDWHILE()
                 case _:
                     stack.append(token)
         # print(self.tokenized_lines[self.ip])
+
+    def interpret_WHILE(self, stack):
+        condition = stack.pop()
+        if condition in self.variables:
+            condition = self.variables[condition]
+        if not isinstance(condition, bool):
+            # TODO: throw an error, while condition must be a bool
+            pass
+        if condition != True:
+            self.ip = self.WHILE_controls[self.ip].ENDWHILE_line
+
+    def interpret_ENDWHILE(self):
+        self.ip = self.ENDWHILE_controls[self.ip].WHILE_line - 1
 
     def interpret_EXPRESSION(self, expression, stack):
         a = stack.pop()
@@ -79,7 +100,6 @@ class Interpreter(InterpreterBase):
         #elif a != 'True' and a != 'False' and b != 'True' and b != 'False':
         #    a, b = int(a), int(b)
         result = None
-        print(a, b)
         match expression:
             case '+':
                 result = a + b
@@ -114,14 +134,16 @@ class Interpreter(InterpreterBase):
         # TODO: get type of variable
         variable = stack.pop()
         value = stack.pop()
-        if value[0] == '"' and value[-1] == '"': # String
+        # print(f'value: {value}, variable: {variable}')
+        if isinstance(value, str) and value[0] == '"' and value[-1] == '"': # String
             value = value[1:-1]
-        elif '.' in value: # Floating Point
+        elif isinstance(value, str) and '.' in value: # Floating Point
             value = float(value)
         elif value == 'True' or value == 'False': # Boolean
             value = value == 'True'
         else: # Integer
             value = int(value)
+        # print(f'value: {value}, variable: {variable}')
         self.variables[variable] = value
 
     def interpret_FUNCCALL(self, stack):
@@ -167,4 +189,20 @@ class Interpreter(InterpreterBase):
             if len(tokens) > 0 and tokens[0] == self.FUNC_DEF:
                 # TODO: error handling if there is no func name or there are more than 1 tokens after def
                 self.func_locs[tokens[1]] = index
+    
+    def setup_controls(self):
+        while_stack = deque()
+        for index, tokens in enumerate(self.tokenized_lines):
+            if not tokens:
+                continue
+            match tokens[0]:
+                case self.WHILE_DEF:
+                    while_stack.append(index)
+                case self.ENDWHILE_DEF:
+                    while_index = while_stack.pop()
+                    if self.leading_spaces[while_index] != self.leading_spaces[index]:
+                        # TODO: throw a syntax error at line_num=while_index
+                        pass
+                    self.WHILE_controls[while_index].ENDWHILE_line = index
+                    self.ENDWHILE_controls[index].WHILE_line = while_index
     
