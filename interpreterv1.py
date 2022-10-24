@@ -52,7 +52,7 @@ class Interpreter(InterpreterBase):
             a1 = a
         else:
             if isinstance(a, str) and a[0] == '"' and a[-1] == '"': # String
-                pass
+                a = a[1:-1]
             elif isinstance(a, str) and '.' in a: # Floating Point
                 a = float(a)
             elif a == 'True' or a == 'False': # Boolean
@@ -66,7 +66,7 @@ class Interpreter(InterpreterBase):
             b1 = b
         else:
             if isinstance(b, str) and b[0] == '"' and b[-1] == '"': # String
-                pass
+                b = b[1:-1]
             elif isinstance(b, str) and '.' in b: # Floating Point
                 b = float(b)
             elif b == 'True' or b == 'False': # Boolean
@@ -79,6 +79,7 @@ class Interpreter(InterpreterBase):
         #elif a != 'True' and a != 'False' and b != 'True' and b != 'False':
         #    a, b = int(a), int(b)
         result = None
+        print(a, b)
         match expression:
             case '+':
                 result = a + b
@@ -114,7 +115,7 @@ class Interpreter(InterpreterBase):
         variable = stack.pop()
         value = stack.pop()
         if value[0] == '"' and value[-1] == '"': # String
-            pass
+            value = value[1:-1]
         elif '.' in value: # Floating Point
             value = float(value)
         elif value == 'True' or value == 'False': # Boolean
@@ -127,12 +128,11 @@ class Interpreter(InterpreterBase):
         func = stack.pop()
         match func:
             case self.PRINT_DEF:
-                token = stack.pop()
-                if token in self.variables:
-                    self.output(self.variables[token])
-                else:
-                    self.output(token)
-            # 
+                prompts = self.combine_stack(stack)
+                util.output(super(), prompts)
+            case self.INPUT_DEF:
+                prompts = [e[1:-1] if isinstance(e, str) and e[0] == '"' and e[-1] == '"' else e for e in stack]
+                self.variables['result'] = str(util.input(super(), prompts))
             case _:
                 # Add the current instruction pointer location and then move to the
                 # location of the function definition.
@@ -141,6 +141,18 @@ class Interpreter(InterpreterBase):
                 # case its not a valid function
                 self.ip = self.func_locs[func]
     
+    def combine_stack(self, stack):
+        prompts = []
+        while stack:
+            i = stack.pop()
+            if isinstance(i, str) and len(i) > 1 and i[0] == '"' and i[-1] == '"':
+                prompts.append(i[1:-1])
+            elif i in self.variables:
+                prompts.append(self.variables[i])
+            else:
+                prompts.append(i)
+        return prompts
+
     def interpret_RETURN(self, stack):
         if len(stack) > 0:
             self.variables['result'] = stack.pop()

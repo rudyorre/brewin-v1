@@ -1,4 +1,4 @@
 func main
- assign v1 20
- funccall print v1
+ funccall input "Enter a name: "
+ funccall print "Hello, " result
 endfunc

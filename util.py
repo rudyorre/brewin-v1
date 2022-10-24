@@ -1,4 +1,5 @@
 from intbase import InterpreterBase
+import functools
 
 def tokenize(line):
     '''
@@ -32,6 +33,17 @@ def tokenize(line):
         # If there is a remaining token, append it
         tokens.append(token)
     return tokens
+
+def input(interpreter, prompts):
+    # prompt = functools.reduce(lambda acc,p: acc+p, prompts, '')
+    prompt = ''.join([str(pro) for pro in prompts])
+    interpreter.output(prompt)
+    return interpreter.get_input()
+
+def output(interpreter, outputs):
+    # output = functools.reduce(lambda acc,o: acc+o, outputs, '')
+    output = ''.join([str(out) for out in outputs])
+    interpreter.output(output)
 
 def is_str(value):
     return value[0] == '"' and value[-1] == '"'
