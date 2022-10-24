@@ -11,6 +11,8 @@ class Interpreter(InterpreterBase):
         self.variables = dict()
         self.call_stack = deque()
 
+        self.variables['result'] = None
+
     def run(self, program):
         self.tokenized_lines = [util.tokenize(line) for line in program]
         self.leading_spaces = [len(line) - len(line.lstrip()) for line in program]
@@ -94,29 +96,27 @@ class Interpreter(InterpreterBase):
         if a in self.variables:
             a = self.variables[a]
             a1 = a
-        else:
-            if isinstance(a, str) and a[0] == '"' and a[-1] == '"': # String
-                a = a[1:-1]
-            elif isinstance(a, str) and '.' in a: # Floating Point
-                a = float(a)
-            elif a == 'True' or a == 'False': # Boolean
-                a = a == 'True'
-            else: # Integer
-                a = int(a)
+        if isinstance(a, str) and a[0] == '"' and a[-1] == '"': # String
+            a = a[1:-1]
+        elif isinstance(a, str) and '.' in a: # Floating Point
+            a = float(a)
+        elif a == 'True' or a == 'False': # Boolean
+            a = a == 'True'
+        else: # Integer
+            a = int(a)
         b = stack.pop()
         b1 = b
         if b in self.variables:
             b = self.variables[b]
             b1 = b
-        else:
-            if isinstance(b, str) and b[0] == '"' and b[-1] == '"': # String
-                b = b[1:-1]
-            elif isinstance(b, str) and '.' in b: # Floating Point
-                b = float(b)
-            elif b == 'True' or b == 'False': # Boolean
-                b = b == 'True'
-            else: # Integer
-                b = int(b)
+        if isinstance(b, str) and b[0] == '"' and b[-1] == '"': # String
+            b = b[1:-1]
+        elif isinstance(b, str) and '.' in b: # Floating Point
+            b = float(b)
+        elif b == 'True' or b == 'False': # Boolean
+            b = b == 'True'
+        else: # Integer
+            b = int(b)
 
         #if isinstance(a, str) and isinstance(b, str) and a[0] == '"' and b[0] == '"' and a[1] == '"' and b[1] == '"':
         #    pass # do nothing bc its a string
@@ -146,6 +146,8 @@ class Interpreter(InterpreterBase):
                 result = a != b
             case '==':
                 result = a == b
+                print(type(a), type(b), type(result))
+                print(a, b, result)
             case '&':
                 result = (a == True) and (b == True)
             case '|':

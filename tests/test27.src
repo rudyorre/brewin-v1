@@ -1,0 +1,51 @@
+#mutually recursive functions
+
+func even
+    # funccall print "even" n
+    if == n 0
+        # funccall print "is even: " result
+        return True
+    endif
+    assign n - n 1
+    funccall odd
+    return result
+endfunc
+
+func odd
+    # funccall print "odd" n
+    if == n 0
+        # funccall print "is odd: " result
+        return False
+    endif
+    assign n - n 1
+    funccall even
+    return result
+endfunc
+
+func isEven
+    funccall even
+    funccall print result
+    funccall print == result True
+    if == result True
+        funccall print "number is even"
+    else
+        funccall print "number is odd"
+    endif
+endfunc
+
+func main
+ assign result "deez nuts"
+ assign n 4
+ funccall isEven
+ funccall print "------"
+ assign n 5
+ funccall isEven
+#    assign n 15
+#    funccall isEven
+#    assign n 20
+#    funccall isEven
+#    assign n 0
+#    funccall isEven
+#    assign n 14
+#    funccall isEven
+endfunc
