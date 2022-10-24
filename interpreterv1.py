@@ -18,7 +18,7 @@ class Interpreter(InterpreterBase):
         self.WHILE_controls = defaultdict(controls.Control_WHILE)
         self.ENDWHILE_controls = defaultdict(controls.Control_ENDWHILE)
         self.setup_controls()
-        
+
         self.ip = self.func_locs['main'] + 1
         self.call_stack.append(self.ip)
 
@@ -141,6 +141,8 @@ class Interpreter(InterpreterBase):
             value = float(value)
         elif value == 'True' or value == 'False': # Boolean
             value = value == 'True'
+        elif isinstance(value, bool):
+            pass
         else: # Integer
             value = int(value)
         # print(f'value: {value}, variable: {variable}')
