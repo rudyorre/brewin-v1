@@ -166,9 +166,9 @@ class Interpreter(InterpreterBase):
             value = int(value)
         elif value in self.variables:
             value = self.variables[value]
-        else:
-            print(value, type(value))
-            super().error(ErrorType.NAME_ERROR, line_num=self.ip)
+        #else:
+        #    print(value, type(value))
+        #    super().error(ErrorType.NAME_ERROR, line_num=self.ip)
         # print(f'value: {value}, variable: {variable}')
         self.variables[variable] = value
 
