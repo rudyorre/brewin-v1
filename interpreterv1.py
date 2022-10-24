@@ -102,7 +102,7 @@ class Interpreter(InterpreterBase):
             a = float(a)
         elif a == 'True' or a == 'False': # Boolean
             a = a == 'True'
-        else: # Integer
+        elif isinstance(a, str) and a.isnumeric(): # Integer
             a = int(a)
         b = stack.pop()
         b1 = b
@@ -115,7 +115,7 @@ class Interpreter(InterpreterBase):
             b = float(b)
         elif b == 'True' or b == 'False': # Boolean
             b = b == 'True'
-        else: # Integer
+        elif isinstance(b, str) and b.isnumeric(): # Integer
             b = int(b)
 
         #if isinstance(a, str) and isinstance(b, str) and a[0] == '"' and b[0] == '"' and a[1] == '"' and b[1] == '"':
@@ -146,8 +146,6 @@ class Interpreter(InterpreterBase):
                 result = a != b
             case '==':
                 result = a == b
-                print(type(a), type(b), type(result))
-                print(a, b, result)
             case '&':
                 result = (a == True) and (b == True)
             case '|':
@@ -168,7 +166,7 @@ class Interpreter(InterpreterBase):
             value = value == 'True'
         elif isinstance(value, bool):
             pass
-        else: # Integer
+        elif isinstance(value, str) and value.isnumeric(): # Integer
             value = int(value)
         # print(f'value: {value}, variable: {variable}')
         self.variables[variable] = value
